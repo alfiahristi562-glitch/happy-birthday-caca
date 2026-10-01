@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday! ✨</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Caveat:wght@600;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tiktok: {
+              black: '#121212',
+              card: '#1e1e2d',
+              pink: '#ff0050',
+              cyan: '#00f2fe',
+              purple: '#7b2cbf'
+            }
+          },
+          fontFamily: {
+            playful: ['Fredoka', 'sans-serif'],
+            handwriting: ['Caveat', 'cursive'],
+            poppins: ['Poppins', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at center, #1f1a3a 0%, #0d0b18 100%);
+      color: #fff;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    .polaroid-item {
+      background: #ffffff;
+      color: #222;
+      padding: 12px 12px 20px 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    }
+    .polaroid-item:hover {
+      transform: scale(1.03) rotate(0deg) !important;
+      z-index: 20;
+    }
+    .washi-tape {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 5;
+    }
+    .candle-flame {
+      animation: flicker 1s infinite alternate;
+      transform-origin: center bottom;
+    }
+    @keyframes flicker {
+      0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+      50% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+      100% { transform: scale(0.95) rotate(-1deg); opacity: 0.85; }
+    }
+    .envelope-wrapper {
+      perspective: 1000px;
+    }
+    .envelope {
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease;
+    }
+    .envelope.open .flap {
+      transform: rotateX(180deg);
+    }
+    .flap {
+      transform-origin: top;
+      transition: transform 0.4s ease 0.2s;
+    }
+  </style>
+</head>
+<body class="relative flex flex-col justify-between items-center py-6 px-4 selection:bg-tiktok-pink selection:text-white min-h-screen">
+
+  <!-- Background Floating Particles -->
+  <div id="particles" class="fixed inset-0 pointer-events-none z-0"></div>
+
+  <!-- Header Navigation Controls -->
+  <div class="fixed top-4 left-4 right-4 z-50 flex justify-between items-center max-w-2xl mx-auto">
+    <div class="bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold text-gray-300">
+      <span id="stepIndicator">Langkah 1 dari 6</span>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button id="musicBtn" onclick="toggleMusic()" class="bg-black/40 backdrop-blur-md hover:bg-black/60 px-3 py-1.5 rounded-full border border-white/10 text-xs flex items-center gap-1.5 transition">
+        <span>🎵</span> <span id="musicStatus">Play Music</span>
+      </button>
+      <button onclick="toggleConfigModal()" class="bg-tiktok-pink/80 hover:bg-tiktok-pink p-2 rounded-full shadow-lg transition">
+        ⚙️
+      </button>
+    </div>
+  </div>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=happy-birthday-115338.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- MAIN CONTAINER -->
+  <main class="w-full max-w-md md:max-w-xl z-10 my-auto pt-14 pb-8">
+
+    <!-- STEP 1: ENVELOPE SURPRISE -->
+    <section id="step-1" class="flex flex-col items-center text-center space-y-6">
+      <div class="space-y-2">
+        <span class="inline-block px-3 py-1 bg-tiktok-pink/20 text-tiktok-pink border border-tiktok-pink/30 rounded-full text-xs font-semibold tracking-wide">
+          Pesan Tersembunyi 📩
+        </span>
+        <h1 class="text-3xl md:text-4xl font-bold font-playful text-white">Ada Surat Buat Kamu!</h1>
+        <p class="text-sm text-gray-300">Klik amplop di bawah ini untuk membuka kejutan...</p>
+      </div>
+
+      <div class="envelope-wrapper my-6 cursor-pointer" onclick="openEnvelope()">
+        <div id="envelope" class="envelope relative w-64 h-44 bg-pink-600 rounded-b-xl shadow-2xl flex items-center justify-center">
+          <div class="flap absolute top-0 left-0 right-0 h-24 bg-pink-700 rounded-t-xl [clip-path:polygon(0_0,_100%_0,_50%_100%)] z-20"></div>
+          <div class="absolute inset-x-0 bottom-0 h-28 bg-pink-500 rounded-b-xl z-10 flex items-center justify-center">
+            <span class="text-4xl animate-bounce">💌</span>
+          </div>
+          <div id="letterInside" class="absolute top-2 w-56 h-36 bg-white rounded-lg shadow-inner p-3 transition-all duration-500 z-0 opacity-0 transform translate-y-4">
+            <p class="text-xs text-gray-800 font-bold">Special Birthday Note ✨</p>
+            <p class="text-xs text-gray-600 mt-1">Klik sekali lagi untuk melanjutkan...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: BIRTHDAY CAKE & BLOW CANDLE -->
+    <section id="step-2" class="hidden flex-col items-center text-center space-y-6">
+      <div class="space-y-2">
+        <span class="inline-block px-3 py-1 bg-tiktok-cyan/20 text-tiktok-cyan border border-tiktok-cyan/30 rounded-full text-xs font-semibold">
+          Make A Wish! 🎂
+        </span>
+        <h2 class="text-3xl font-bold font-playful text-white">Tiup Lilinya Yuk!</h2>
+        <p class="text-xs text-gray-300">Klik tombol tiup di bawah atau tekan lilinnya langsung!</p>
+      </div>
+
+      <!-- Cake Illustration -->
+      <div class="relative my-8 cursor-pointer group" onclick="blowOutCandle()">
+        <div class="w-48 h-32 bg-amber-100 rounded-t-3xl relative mx-auto border-b-8 border-amber-200 shadow-xl flex items-center justify-center">
+          <div class="absolute -top-6 left-0 right-0 h-6 bg-pink-400 rounded-t-full"></div>
+          <div class="absolute -top-3 left-4 w-6 h-6 bg-pink-300 rounded-full"></div>
+          <div class="absolute -top-3 left-16 w-8 h-8 bg-pink-300 rounded-full"></div>
+          <div class="absolute -top-3 right-6 w-6 h-6 bg-pink-300 rounded-full"></div>
+          
+          <!-- Candle -->
+          <div class="absolute -top-16 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+            <div id="candleFlame" class="candle-flame w-5 h-7 bg-amber-400 rounded-full blur-[1px] shadow-[0_0_15px_#f59e0b]"></div>
+            <div class="w-3 h-10 bg-gradient-to-b from-blue-300 to-indigo-500 rounded-sm"></div>
+          </div>
+        </div>
+        <div class="w-56 h-6 bg-amber-900/40 rounded-full mx-auto blur-sm -mt-2"></div>
+      </div>
+
+      <button id="blowBtn" onclick="blowOutCandle()" class="px-6 py-3 bg-gradient-to-r from-tiktok-pink to-tiktok-purple hover:scale-105 active:scale-95 text-white font-bold rounded-full shadow-lg transition duration-200 flex items-center gap-2">
+        <span>🌬️</span> Tiup Lilin Sekarang
+      </button>
+    </section>
+
+    <!-- STEP 3: RUNAWAY NO BUTTON (QUIZ) -->
+    <section id="step-3" class="hidden flex-col items-center text-center space-y-6">
+      <div class="glass-card p-6 rounded-2xl w-full space-y-6 relative overflow-hidden">
+        <span class="text-4xl">😜</span>
+        <h2 id="quizQuestion" class="text-xl font-bold text-white font-playful">
+          Btw kan kamu lagi ultah nih... Boleh dong traktirannya wkwkwkwk 🤪
+        </h2>
+        
+        <div id="quizContainer" class="relative h-28 w-full flex items-center justify-center gap-6">
+            <button onclick="answerQuiz(true)" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg transition hover:scale-105 z-10">
+                <span id="yesBtnText">Gas traktir lah! 🍕🧋</span>
+            </button>
+  
+            <button id="noBtn" onmouseenter="moveNoBtn()" onclick="moveNoBtn()" class="px-6 py-2.5 bg-rose-500 text-white font-bold rounded-xl shadow-lg transition-all duration-200">
+                <span id="noBtnText">Gamauu wlee 😜</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- STEP 4: POLAROID PHOTO GALLERY -->
+    <section id="step-4" class="hidden flex-col items-center justify-center space-y-6 min-h-[70vh] py-4">
+      <div class="text-center space-y-1">
+        <span class="inline-block px-3 py-1 bg-tiktok-pink/20 text-tiktok-pink border border-tiktok-pink/30 rounded-full text-xs font-semibold">
+          Photo Memories 📸
+        </span>
+        <h2 id="galleryTitle" class="text-2xl font-bold font-playful text-tiktok-cyan">Foto-foto Kita 📸</h2>
+        <p class="text-xs text-gray-300">Momen yang berharga!</p>
+      </div>
+
+      <!-- Polaroid Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full pt-2">
+        <!-- Polaroid Photo 1 -->
+        <div class="polaroid-item rounded-xl transform -rotate-3 hover:rotate-0 relative">
+          <div class="washi-tape"></div>
+          <div class="w-full h-48 bg-gray-100 rounded overflow-hidden relative mt-1">
+            <img id="imgPreview1" src="foto1.jpeg" alt="Memory 1" class="w-full h-full object-cover">
+          </div>
+          <p id="caption1" class="font-handwriting text-xl text-center mt-3 text-gray-800 font-bold">Moment Pkkmb</p>
+        </div>
+
+        <!-- Polaroid Photo 2 -->
+        <div class="polaroid-item rounded-xl transform rotate-3 hover:rotate-0 relative">
+          <div class="washi-tape"></div>
+          <div class="w-full h-48 bg-gray-100 rounded overflow-hidden relative mt-1">
+            <img id="imgPreview2" src="foto2.jpeg" alt="Memory 2" class="w-full h-full object-cover">
+          </div>
+          <p id="caption2" class="font-handwriting text-xl text-center mt-3 text-gray-800 font-bold">Yang ini cantik ❤️</p>
+        </div>
+
+        <!-- Polaroid Photo 3 -->
+        <div class="polaroid-item rounded-xl transform -rotate-2 hover:rotate-0 sm:col-span-2 sm:max-w-xs sm:mx-auto w-full relative -mt-6">
+          <div class="washi-tape"></div>
+          <div class="w-full h-48 bg-gray-100 rounded overflow-hidden relative mt-1">
+            <img id="imgPreview3" src="foto3.jpeg" alt="Memory 3" class="w-full h-full object-cover">
+          </div>
+          <p id="caption3" class="font-handwriting text-xl text-center mt-3 text-gray-800 font-bold">Di curug!</p>
+        </div>
+      </div>
+
+      <button onclick="nextStep()" class="mt-4 px-6 py-2.5 bg-tiktok-pink hover:bg-pink-600 text-white font-bold rounded-full shadow-lg transition">
+        Lanjut ke Surat 💌
+      </button>
+    </section>
+
+    <!-- STEP 5: AUTOMATIC TYPING BIRTHDAY LETTER -->
+    <section id="step-5" class="hidden flex-col items-center space-y-6">
+      <div class="glass-card p-6 rounded-2xl w-full space-y-4 relative">
+        <div class="flex justify-between items-center border-b border-white/10 pb-3">
+          <h3 class="font-playful text-lg font-bold text-tiktok-pink">Surat spesial buat kamuuu ✨</h3>
+          <span class="text-xs text-gray-400">Dari: <span id="senderNameDisplay">Teman Terbaikmu</span></span>
+        </div>
+        
+        <div class="min-h-[160px] text-sm leading-relaxed text-gray-200 font-poppins" id="typewriterBox">
+          <span id="typewriterText"></span><span class="animate-pulse text-tiktok-cyan">|</span>
+        </div>
+
+        <button id="giftBtn" onclick="nextStep()" class="hidden w-full py-3 bg-gradient-to-r from-tiktok-cyan to-blue-600 font-bold text-white rounded-xl shadow-lg transition hover:scale-102">
+          Buka Kado 🎁
+        </button>
+      </div>
+    </section>
+
+  <!-- STEP 6: SURPRISE GIFT MODAL -->
+    <!-- STEP 6: SURPRISE GIFT MODAL -->
+    <section id="step-6" class="hidden flex-col items-center text-center space-y-6">
+      <div class="glass-card p-6 rounded-2xl w-full space-y-6 relative border-2 border-tiktok-pink/50">
+        <div class="text-5xl animate-bounce">🎟️</div>
+        <div class="space-y-2">
+          <h2 class="text-2xl font-bold font-playful text-white">VOUCHER SPESIAL ULTAH!</h2>
+          <p class="text-xs text-gray-300">Hadiah ramah kantong tapi penuh kasih sayang wkwk ✨</p>
+        </div>
+
+        <div class="bg-white/10 border border-dashed border-tiktok-pink p-4 rounded-xl text-left space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs text-tiktok-cyan font-semibold">TICKET ID: #BESTIE-FREE-PASS</span>
+            <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">CLAIMED</span>
+          </div>
+          <p class="font-bold text-base text-white">1x VIP Bestie Support & Curhat Pass 👑💬</p>
+          <p class="text-xs text-gray-300">Bebas minta dengerin curhat/gosip midnight, nemenin nugas pusing, tanpa di-judge! Berlaku selamanya 🥳✨</p>
+        </div>
+
+        <button onclick="claimGift()" class="w-full py-3 bg-tiktok-pink hover:bg-pink-600 font-bold text-white rounded-xl shadow-lg transition">
+          Klaim Voucher via WhatsApp 📱
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CONFIGURATION MODAL -->
+  <div id="configModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-white/20 rounded-2xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto space-y-4 text-left">
+      <div class="flex justify-between items-center border-b border-gray-700 pb-3">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">⚙️ Edit Isi Web</h3>
+        <button onclick="toggleConfigModal()" class="text-gray-400 hover:text-white">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-gray-300 mb-1 font-semibold">Nama Teman Yang Ultah:</label>
+          <input type="text" id="cfgName" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white">
+        </div>
+
+        <div>
+          <label class="block text-gray-300 mb-1 font-semibold">Nama Pengirim:</label>
+          <input type="text" id="cfgSender" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white">
+        </div>
+
+        <div>
+          <label class="block text-gray-300 mb-1 font-semibold">Isi Surat Ucapan:</label>
+          <textarea id="cfgLetter" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white"></textarea>
+        </div>
+
+        <div class="border-t border-gray-800 pt-3">
+          <p class="font-bold text-tiktok-cyan mb-2">📸 Foto Polaroid (Pilih Langsung Dari Laptop)</p>
+          
+          <div class="space-y-2">
+            <div>
+              <label class="block text-gray-400 mb-1">Foto 1:</label>
+              <input type="file" id="fileInput1" accept="image/*" class="w-full bg-gray-800 text-white p-1 rounded border border-gray-700">
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-1">Foto 2:</label>
+              <input type="file" id="fileInput2" accept="image/*" class="w-full bg-gray-800 text-white p-1 rounded border border-gray-700">
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-1">Foto 3:</label>
+              <input type="file" id="fileInput3" accept="image/*" class="w-full bg-gray-800 text-white p-1 rounded border border-gray-700">
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button onclick="saveConfig()" class="w-full py-3 bg-tiktok-pink hover:bg-pink-600 font-bold text-white rounded-lg transition shadow-lg">
+            Simpan Perubahan 💾
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State App
+    let currentStep = 1;
+    let isMusicPlaying = false;
+    const bgMusic = document.getElementById('bgMusic');
+
+    // Configuration Default
+    let config = {
+      name: "Cacaa",
+      sender: "Itii",
+      letter: `Happy Birthday yaa cacaa!
+      Panjang umur, sehat selaluuu yaaww, ciee uda kepala 2 wkwkwk. Semoga di umur kamu yang sekarang bisa jadi  peribadi yang lebih baik lagi, makin pinter, cantik, rajin, banyak rezekinyaa aamiinnn dan semua hal-hal baik selalu datang ke hidup kamu, dikelilingi orang-orang yang sayang sama kamu, dan selalu bahagia walau harinya lagi capek! Stay amazing ya! Tetep jadi diri kamu yang keren/luar biasa kaya yang sekarang ini yaaa! ✨
+      Makacii yaa cacaa uda jadi temen baik akuu yang jadi support system aku,  yang mau diajak belajar bareng dan makacii uda jadi pendengar yang baikk. Jangan pernah bosen ya temenan sama aku, beruntung banget bisa kenal dan temenan sama cacaa, semoga pertemanan kita selamanya yaa gaakan pernah putus hehe. 
+      hmm apalagii yakk, udah deh segitu ajaaa btw happy birthdayy cacaa! WYATB`,
+      img1: "foto1.jepg",
+      img2: "foto2.jepg",
+      img3: "foto3.jepg",
+    };
+
+    // Load LocalStorage
+    function loadSavedConfig() {
+      const saved = localStorage.getItem('bday_config');
+      if (saved) {
+        config = { ...config, ...JSON.parse(saved) };
+      }
+      applyConfigToUI();
+    }
+
+    function applyConfigToUI() {
+      document.getElementById('senderNameDisplay').innerText = config.sender;
+      if (config.img1) document.getElementById('imgPreview1').src = config.img1;
+      if (config.img2) document.getElementById('imgPreview2').src = config.img2;
+      if (config.img3) document.getElementById('imgPreview3').src = config.img3;
+      
+      document.getElementById('cfgName').value = config.name;
+      document.getElementById('cfgSender').value = config.sender;
+      document.getElementById('cfgLetter').value = config.letter;
+    }
+
+    // Toggle Music
+    function toggleMusic() {
+      if (isMusicPlaying) {
+        bgMusic.pause();
+        document.getElementById('musicStatus').innerText = "Play Music";
+      } else {
+        bgMusic.play();
+        document.getElementById('musicStatus').innerText = "Pause Music";
+      }
+      isMusicPlaying = !isMusicPlaying;
+    }
+
+    // Envelope Logic
+    function openEnvelope() {
+      const envelope = document.getElementById('envelope');
+      const letter = document.getElementById('letterInside');
+      
+      if (!envelope.classList.contains('open')) {
+        envelope.classList.add('open');
+        letter.classList.remove('opacity-0', 'translate-y-4');
+        letter.classList.add('-translate-y-12');
+        if (!isMusicPlaying) toggleMusic();
+      } else {
+        nextStep();
+      }
+    }
+
+    // Step Switcher
+    function nextStep() {
+      document.getElementById(`step-${currentStep}`).classList.add('hidden');
+      document.getElementById(`step-${currentStep}`).classList.remove('flex');
+      
+      currentStep++;
+      
+      const nextSec = document.getElementById(`step-${currentStep}`);
+      if (nextSec) {
+        nextSec.classList.remove('hidden');
+        nextSec.classList.add('flex');
+        document.getElementById('stepIndicator').innerText = `Langkah ${currentStep} dari 6`;
+      }
+
+      if (currentStep === 5) {
+        startTypewriter();
+      }
+    }
+
+    // Candle Blow
+    function blowOutCandle() {
+      const flame = document.getElementById('candleFlame');
+      flame.style.display = 'none';
+      
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      setTimeout(() => {
+        nextStep();
+      }, 1500);
+    }
+
+    // Runaway No Button
+    function moveNoBtn() {
+      const btn = document.getElementById('noBtn');
+      const container = document.getElementById('quizContainer');
+      const rect = container.getBoundingClientRect();
+      
+      const x = Math.random() * (rect.width - 100) - (rect.width / 2 - 50);
+      const y = Math.random() * (rect.height - 40) - (rect.height / 2 - 20);
+      
+      btn.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    function answerQuiz(isYes) {
+      if (isYes) {
+        confetti({ particleCount: 80, spread: 60 });
+        setTimeout(() => {
+          nextStep();
+        }, 800);
+      }
+    }
+
+    // Typewriter Letter
+    function startTypewriter() {
+      const box = document.getElementById('typewriterText');
+      box.innerText = "";
+      let i = 0;
+      const text = config.letter;
+
+      function type() {
+        if (i < text.length) {
+          box.innerText += text.charAt(i);
+          i++;
+          setTimeout(type, 35);
+        } else {
+          document.getElementById('giftBtn').classList.remove('hidden');
+        }
+      }
+      type();
+    }
+
+    // Claim Gift
+    function claimGift() {
+      confetti({ particleCount: 150, spread: 100 });
+      const msg = encodeURIComponent(`Halo! Makasih yaa kado vouchernya wkwk 🥳 Siap-siap aku gangguin buat nemenin curhat/nugas ya! 💬✨`);
+      window.open(`https://wa.me/?text=${msg}`, '_blank');
+    }
+
+    // Config Modal
+    function toggleConfigModal() {
+      const modal = document.getElementById('configModal');
+      modal.classList.toggle('hidden');
+    }
+
+    // Save Config with FileReader for Uploaded Images
+    function saveConfig() {
+      config.name = document.getElementById('cfgName').value;
+      config.sender = document.getElementById('cfgSender').value;
+      config.letter = document.getElementById('cfgLetter').value;
+
+      const f1 = document.getElementById('fileInput1').files[0];
+      const f2 = document.getElementById('fileInput2').files[0];
+      const f3 = document.getElementById('fileInput3').files[0];
+
+      let readPromises = [];
+
+      if (f1) {
+        readPromises.push(new Promise(resolve => {
+          const r = new FileReader();
+          r.onload = e => { config.img1 = e.target.result; resolve(); };
+          r.readAsDataURL(f1);
+        }));
+      }
+      if (f2) {
+        readPromises.push(new Promise(resolve => {
+          const r = new FileReader();
+          r.onload = e => { config.img2 = e.target.result; resolve(); };
+          r.readAsDataURL(f2);
+        }));
+      }
+      if (f3) {
+        readPromises.push(new Promise(resolve => {
+          const r = new FileReader();
+          r.onload = e => { config.img3 = e.target.result; resolve(); };
+          r.readAsDataURL(f3);
+        }));
+      }
+
+      Promise.all(readPromises).then(() => {
+        localStorage.setItem('bday_config', JSON.stringify(config));
+        applyConfigToUI();
+        toggleConfigModal();
+        alert('Pengaturan & Foto berhasil diperbarui!');
+      });
+    }
+
+    // Background Floating Particles Creation
+    function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'absolute rounded-full bg-white/20 animate-pulse';
+        const size = Math.random() * 6 + 2;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        container.appendChild(particle);
+      }
+    }
+
+    window.onload = () => {
+      loadSavedConfig();
+      createParticles();
+    };
+  </script>
+</body>
+</html>
